@@ -13,7 +13,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "setup-whatsapp": "npm install whatsapp-web.js qrcode-terminal",
-    "audit": "npm audit"
+    "audit": "npm audit",
+    "prepare": "husky"
   },
   "dependencies": {
     "axios": "1.14.0",
@@ -31,7 +32,18 @@
     "eslint": "10.3.0",
     "eslint-config-prettier": "10.1.8",
     "globals": "17.6.0",
+    "husky": "9.1.7",
+    "lint-staged": "17.0.4",
     "prettier": "3.8.3"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix --max-warnings 0",
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
   },
   "engines": {
     "node": ">=18.0.0"
