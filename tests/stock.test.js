@@ -1,7 +1,7 @@
 "use strict";
 
 const { test } = require("node:test");
-const assert   = require("node:assert/strict");
+const assert = require("node:assert/strict");
 const { detectStock, simpleHash, extractCtaRegion } = require("../lib/stock");
 
 // ─── detectStock ─────────────────────────────────────────────
@@ -61,10 +61,12 @@ test("detectStock: JSON-LD OutOfStock -> unavailable", () => {
 
 test("detectStock: JSON-LD @graph wrapping -> available", () => {
   const schema = JSON.stringify({
-    "@graph": [{
-      "@type": "Product",
-      offers: { availability: "https://schema.org/InStock" },
-    }],
+    "@graph": [
+      {
+        "@type": "Product",
+        offers: { availability: "https://schema.org/InStock" },
+      },
+    ],
   });
   const html = '<script type="application/ld+json">' + schema + "</script>";
   const r = detectStock(html);
@@ -104,7 +106,7 @@ test("detectStock: enabled add-to-cart button -> available (fallback)", () => {
 });
 
 test("detectStock: disabled add-to-cart button -> not available", () => {
-  const html = '<button disabled>Ajouter au panier</button>';
+  const html = "<button disabled>Ajouter au panier</button>";
   const r = detectStock(html);
   assert.equal(r.likelyAvailable, false);
 });
@@ -115,8 +117,8 @@ test("detectStock: CTA takes priority over JSON-LD", () => {
     "@type": "Product",
     offers: { availability: "https://schema.org/InStock" },
   });
-  const html = '<a href="#!">Indisponible</a>' +
-    '<script type="application/ld+json">' + schema + "</script>";
+  const html =
+    '<a href="#!">Indisponible</a>' + '<script type="application/ld+json">' + schema + "</script>";
   const r = detectStock(html);
   assert.equal(r.likelyAvailable, false);
   assert.equal(r.likelyUnavailable, true);

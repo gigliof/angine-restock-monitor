@@ -5,7 +5,7 @@
 // by passing in minimal page mocks.
 
 const { test } = require("node:test");
-const assert   = require("node:assert/strict");
+const assert = require("node:assert/strict");
 
 // ─── Inline the pure helpers under test ──────────────────────
 // Rather than requiring cart.js (which loads config and puppeteer at the
@@ -26,9 +26,13 @@ async function fillField(page, selectors, value) {
 
 async function clickProceedToCheckout(page) {
   const clicked = await page.evaluate(() => {
-    const btn = Array.from(document.querySelectorAll("a, button"))
-      .find((el) => /proc\u00e9der|paiement|checkout/i.test(el.textContent));
-    if (btn) { btn.click(); return true; }
+    const btn = Array.from(document.querySelectorAll("a, button")).find((el) =>
+      /proc\u00e9der|paiement|checkout/i.test(el.textContent)
+    );
+    if (btn) {
+      btn.click();
+      return true;
+    }
     return false;
   });
   if (!clicked) return false;
@@ -41,8 +45,8 @@ async function clickProceedToCheckout(page) {
 test("fillField: returns true when a selector succeeds", async () => {
   const page = {
     waitForSelector: async () => {},
-    click:           async () => {},
-    type:            async () => {},
+    click: async () => {},
+    type: async () => {},
   };
   const result = await fillField(page, ["#email"], "test@example.com");
   assert.equal(result, true);
@@ -50,9 +54,11 @@ test("fillField: returns true when a selector succeeds", async () => {
 
 test("fillField: returns false when all selectors fail", async () => {
   const page = {
-    waitForSelector: async () => { throw new Error("not found"); },
-    click:           async () => {},
-    type:            async () => {},
+    waitForSelector: async () => {
+      throw new Error("not found");
+    },
+    click: async () => {},
+    type: async () => {},
   };
   const result = await fillField(page, ["#email", "#alt-email"], "test@example.com");
   assert.equal(result, false);
@@ -67,7 +73,7 @@ test("fillField: tries next selector after first fails", async () => {
       // second selector succeeds
     },
     click: async () => {},
-    type:  async () => {},
+    type: async () => {},
   };
   const result = await fillField(page, ["#first", "#second"], "value");
   assert.equal(result, true);
@@ -78,7 +84,7 @@ test("fillField: tries next selector after first fails", async () => {
 
 test("clickProceedToCheckout: returns false when evaluate returns false", async () => {
   const page = {
-    evaluate:         async () => false,
+    evaluate: async () => false,
     waitForNavigation: async () => {},
   };
   const result = await clickProceedToCheckout(page);
@@ -87,7 +93,7 @@ test("clickProceedToCheckout: returns false when evaluate returns false", async 
 
 test("clickProceedToCheckout: returns true when evaluate returns true", async () => {
   const page = {
-    evaluate:          async () => true,
+    evaluate: async () => true,
     waitForNavigation: async () => {},
   };
   const result = await clickProceedToCheckout(page);
@@ -96,8 +102,10 @@ test("clickProceedToCheckout: returns true when evaluate returns true", async ()
 
 test("clickProceedToCheckout: returns true even when waitForNavigation rejects", async () => {
   const page = {
-    evaluate:          async () => true,
-    waitForNavigation: async () => { throw new Error("timeout"); },
+    evaluate: async () => true,
+    waitForNavigation: async () => {
+      throw new Error("timeout");
+    },
   };
   // waitForNavigation is caught internally (.catch(() => {})), so still returns true
   const result = await clickProceedToCheckout(page);
@@ -107,8 +115,10 @@ test("clickProceedToCheckout: returns true even when waitForNavigation rejects",
 test("clickProceedToCheckout: does not call waitForNavigation when button not found", async () => {
   let navCalled = false;
   const page = {
-    evaluate:          async () => false,
-    waitForNavigation: async () => { navCalled = true; },
+    evaluate: async () => false,
+    waitForNavigation: async () => {
+      navCalled = true;
+    },
   };
   await clickProceedToCheckout(page);
   assert.equal(navCalled, false);

@@ -23,7 +23,7 @@ function required(key) {
 
 function optional(key, fallback) {
   const val = process.env[key];
-  return (val && val.trim()) ? val.trim() : (fallback !== undefined ? fallback : "");
+  return val && val.trim() ? val.trim() : fallback !== undefined ? fallback : "";
 }
 
 function optionalBool(key, fallback) {
@@ -37,12 +37,20 @@ function isValidEmail(addr) {
 }
 
 function positiveInt(key, fallback, min, max) {
-  const n  = parseInt(optional(key, String(fallback)), 10);
+  const n = parseInt(optional(key, String(fallback)), 10);
   const lo = min !== undefined ? min : 1;
   const hi = max !== undefined ? max : Number.MAX_SAFE_INTEGER;
   if (!Number.isFinite(n) || n < lo || n > hi) {
-    console.error("[config] " + key + " must be an integer between " + lo + " and " + hi +
-      ", got: " + sanitizeLog(process.env[key]));
+    console.error(
+      "[config] " +
+        key +
+        " must be an integer between " +
+        lo +
+        " and " +
+        hi +
+        ", got: " +
+        sanitizeLog(process.env[key])
+    );
     process.exit(1);
   }
   return n;
@@ -50,7 +58,12 @@ function positiveInt(key, fallback, min, max) {
 
 const method = optional("NOTIFICATION_METHOD", "email");
 if (!NOTIFICATION_METHODS.includes(method)) {
-  console.error("[config] NOTIFICATION_METHOD must be one of: " + NOTIFICATION_METHODS.join(", ") + ", got: " + sanitizeLog(method));
+  console.error(
+    "[config] NOTIFICATION_METHOD must be one of: " +
+      NOTIFICATION_METHODS.join(", ") +
+      ", got: " +
+      sanitizeLog(method)
+  );
   process.exit(1);
 }
 
@@ -59,21 +72,21 @@ if (!NOTIFICATION_METHODS.includes(method)) {
 const cartEnabled = optional("ENABLE_CART_AUTOMATION", "true") === "true";
 
 // Allowed base URL and hostname - Puppeteer will refuse to navigate anywhere else.
-const ALLOWED_ORIGIN   = "https://anginedepoitrine.com/";
+const ALLOWED_ORIGIN = "https://anginedepoitrine.com/";
 const ALLOWED_HOSTNAME = "anginedepoitrine.com";
 
 const products = [
   {
     name: "Angine de Poitrine - Vol. 1 (Vinyle)",
-    url:  "https://anginedepoitrine.com/product/1150712-angine-de-poitrine-vol-1-vinyle",
+    url: "https://anginedepoitrine.com/product/1150712-angine-de-poitrine-vol-1-vinyle",
   },
   {
     name: "Angine de Poitrine - Vol. II (Vinyle)",
-    url:  "https://anginedepoitrine.com/product/1229664-angine-de-poitrine-vol-ii-vinyle",
+    url: "https://anginedepoitrine.com/product/1229664-angine-de-poitrine-vol-ii-vinyle",
   },
   {
     name: "Bundle Vol. I & II (Vinyle)",
-    url:  "https://anginedepoitrine.com/product/1230619-bundle-vol-i-et-ii-vinyle",
+    url: "https://anginedepoitrine.com/product/1230619-bundle-vol-i-et-ii-vinyle",
   },
 ];
 
@@ -89,7 +102,9 @@ for (const p of products) {
       process.exit(1);
     }
     if (parsed.hostname !== ALLOWED_HOSTNAME) {
-      console.error("[config] Product URL hostname is not allowed (" + ALLOWED_HOSTNAME + "): " + p.url);
+      console.error(
+        "[config] Product URL hostname is not allowed (" + ALLOWED_HOSTNAME + "): " + p.url
+      );
       process.exit(1);
     }
   } catch (_) {
@@ -99,15 +114,15 @@ for (const p of products) {
 }
 
 module.exports = {
-  checkIntervalMinutes:        positiveInt("CHECK_INTERVAL_MINUTES", 10),
+  checkIntervalMinutes: positiveInt("CHECK_INTERVAL_MINUTES", 10),
   notificationCooldownMinutes: positiveInt("NOTIFICATION_COOLDOWN_MINUTES", 60),
-  notificationMethod:          method,
-  allowedOrigin:               ALLOWED_ORIGIN,
-  allowedHostname:             ALLOWED_HOSTNAME,
+  notificationMethod: method,
+  allowedOrigin: ALLOWED_ORIGIN,
+  allowedHostname: ALLOWED_HOSTNAME,
 
   email: (() => {
     const from = method === "email" ? required("EMAIL_FROM") : optional("EMAIL_FROM");
-    const to   = method === "email" ? required("EMAIL_TO")   : optional("EMAIL_TO");
+    const to = method === "email" ? required("EMAIL_TO") : optional("EMAIL_TO");
     if (method === "email") {
       if (!isValidEmail(from)) {
         console.error("[config] EMAIL_FROM is not a valid email address: " + sanitizeLog(from));
@@ -119,20 +134,24 @@ module.exports = {
       }
     }
     return {
-      host:   optional("SMTP_HOST", "smtp.gmail.com"),
-      port:   positiveInt("SMTP_PORT", 587, 1, 65535),
+      host: optional("SMTP_HOST", "smtp.gmail.com"),
+      port: positiveInt("SMTP_PORT", 587, 1, 65535),
       secure: optional("SMTP_SECURE", "false") === "true",
-      user:   method === "email" ? required("SMTP_USER") : optional("SMTP_USER"),
-      pass:   method === "email" ? required("SMTP_PASS") : optional("SMTP_PASS"),
+      user: method === "email" ? required("SMTP_USER") : optional("SMTP_USER"),
+      pass: method === "email" ? required("SMTP_PASS") : optional("SMTP_PASS"),
       from,
       to,
     };
   })(),
 
   whatsapp: (() => {
-    const recipientNumber = method === "whatsapp" ? required("WA_RECIPIENT_NUMBER") : optional("WA_RECIPIENT_NUMBER");
+    const recipientNumber =
+      method === "whatsapp" ? required("WA_RECIPIENT_NUMBER") : optional("WA_RECIPIENT_NUMBER");
     if (method === "whatsapp" && recipientNumber && !/^\+\d{7,15}$/.test(recipientNumber)) {
-      console.error("[config] WA_RECIPIENT_NUMBER must be in E.164 format (e.g. +15551234567), got: " + sanitizeLog(recipientNumber));
+      console.error(
+        "[config] WA_RECIPIENT_NUMBER must be in E.164 format (e.g. +15551234567), got: " +
+          sanitizeLog(recipientNumber)
+      );
       process.exit(1);
     }
     return {
@@ -142,41 +161,48 @@ module.exports = {
   })(),
 
   telegram: (() => {
-    const botToken = method === "telegram" ? required("TELEGRAM_BOT_TOKEN") : optional("TELEGRAM_BOT_TOKEN");
-    const chatId   = method === "telegram" ? required("TELEGRAM_CHAT_ID")   : optional("TELEGRAM_CHAT_ID");
+    const botToken =
+      method === "telegram" ? required("TELEGRAM_BOT_TOKEN") : optional("TELEGRAM_BOT_TOKEN");
+    const chatId =
+      method === "telegram" ? required("TELEGRAM_CHAT_ID") : optional("TELEGRAM_CHAT_ID");
     if (method === "telegram" && chatId && !/^-?\d+$/.test(chatId)) {
-      console.error("[config] TELEGRAM_CHAT_ID must be a numeric chat ID (e.g. 123456789 or -100123456789), got: " + sanitizeLog(chatId));
+      console.error(
+        "[config] TELEGRAM_CHAT_ID must be a numeric chat ID (e.g. 123456789 or -100123456789), got: " +
+          sanitizeLog(chatId)
+      );
       process.exit(1);
     }
     return { botToken, chatId };
   })(),
 
   // null when cart automation is disabled - callers check for null before running automation.
-  checkoutDetails: cartEnabled ? (() => {
-    const email = required("CHECKOUT_EMAIL");
-    if (!isValidEmail(email)) {
-      console.error("[config] CHECKOUT_EMAIL is not a valid email: " + sanitizeLog(email));
-      process.exit(1);
-    }
-    const phone = required("CHECKOUT_PHONE");
-    if (phone.length > 30 || !/^\+?[\d\s\-().]{6,30}$/.test(phone)) {
-      console.error("[config] CHECKOUT_PHONE format looks invalid: " + sanitizeLog(phone));
-      process.exit(1);
-    }
-    return {
-      email,
-      firstName:   required("CHECKOUT_FIRST_NAME").slice(0, 100),
-      lastName:    required("CHECKOUT_LAST_NAME").slice(0, 100),
-      address1:    required("CHECKOUT_ADDRESS").slice(0, 200),
-      city:        required("CHECKOUT_CITY").slice(0, 100),
-      postalCode:  required("CHECKOUT_POSTAL_CODE").slice(0, 20),
-      phone,
-      country:     required("CHECKOUT_COUNTRY").slice(0, 60),
-      countryCode: required("CHECKOUT_COUNTRY_CODE").slice(0, 5),
-      state:       required("CHECKOUT_STATE").slice(0, 60),
-      stateCode:   required("CHECKOUT_STATE_CODE").slice(0, 5),
-    };
-  })() : null,
+  checkoutDetails: cartEnabled
+    ? (() => {
+        const email = required("CHECKOUT_EMAIL");
+        if (!isValidEmail(email)) {
+          console.error("[config] CHECKOUT_EMAIL is not a valid email: " + sanitizeLog(email));
+          process.exit(1);
+        }
+        const phone = required("CHECKOUT_PHONE");
+        if (phone.length > 30 || !/^\+?[\d\s\-().]{6,30}$/.test(phone)) {
+          console.error("[config] CHECKOUT_PHONE format looks invalid: " + sanitizeLog(phone));
+          process.exit(1);
+        }
+        return {
+          email,
+          firstName: required("CHECKOUT_FIRST_NAME").slice(0, 100),
+          lastName: required("CHECKOUT_LAST_NAME").slice(0, 100),
+          address1: required("CHECKOUT_ADDRESS").slice(0, 200),
+          city: required("CHECKOUT_CITY").slice(0, 100),
+          postalCode: required("CHECKOUT_POSTAL_CODE").slice(0, 20),
+          phone,
+          country: required("CHECKOUT_COUNTRY").slice(0, 60),
+          countryCode: required("CHECKOUT_COUNTRY_CODE").slice(0, 5),
+          state: required("CHECKOUT_STATE").slice(0, 60),
+          stateCode: required("CHECKOUT_STATE_CODE").slice(0, 5),
+        };
+      })()
+    : null,
 
   // Puppeteer sandbox settings. Set to true in containerized environments that require it.
   // When false (default), Chromium's sandbox provides an extra security layer.

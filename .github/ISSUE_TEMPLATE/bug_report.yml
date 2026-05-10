@@ -1,0 +1,88 @@
+name: Bug report
+description: Something isn't working as expected
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. The more detail you provide, the faster it gets fixed.
+
+        ⚠️ **Do not include any secrets** (SMTP passwords, Telegram tokens, WhatsApp session data, checkout URLs, personal addresses) in this report.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Stock detection (false positive / false negative)
+        - Email notifications
+        - Telegram notifications
+        - WhatsApp notifications
+        - Cart automation (Puppeteer)
+        - Configuration / .env validation
+        - Logging / state file
+        - CLI flags
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: A clear description of the bug.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Set NOTIFICATION_METHOD=...
+        2. Run `node monitor.js --once`
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+
+  - type: input
+    id: node
+    attributes:
+      label: Node.js version
+      placeholder: "v20.11.1"
+    validations:
+      required: true
+
+  - type: input
+    id: os
+    attributes:
+      label: OS
+      placeholder: "macOS 14, Ubuntu 22.04, ..."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: cart
+    attributes:
+      label: Is cart automation enabled?
+      options:
+        - "Yes (ENABLE_CART_AUTOMATION=true, Puppeteer installed)"
+        - "No (ENABLE_CART_AUTOMATION=false)"
+        - "Yes, but Puppeteer not installed"
+        - "Not sure"
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: Paste from `monitor.log` if applicable. Redact any secrets, checkout URLs, or personal info.
+      render: shell

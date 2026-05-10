@@ -1,0 +1,33 @@
+Angine Restock Monitor
+Copyright (c) 2026 gigliof
+
+This product includes the following third-party components. Each is subject
+to its own license terms; check the upstream project for the full text.
+
+────────────────────────────────────────────────────────────────────────────
+Runtime dependencies (full list in package.json)
+────────────────────────────────────────────────────────────────────────────
+
+  axios                    - MIT       (HTTP client, pinned to 1.14.0)
+  cheerio                  - MIT       (server-side HTML parsing)
+  dotenv                   - BSD-2     (.env file loader)
+  nodemailer               - MIT-0     (SMTP email)
+
+────────────────────────────────────────────────────────────────────────────
+Optional dependencies (installed only if the related feature is enabled)
+────────────────────────────────────────────────────────────────────────────
+
+  puppeteer                - Apache-2.0 (headless Chromium for cart automation)
+  whatsapp-web.js          - Apache-2.0 (WhatsApp notifications)
+  qrcode-terminal          - Apache-2.0 (QR display for WhatsApp pairing)
+
+────────────────────────────────────────────────────────────────────────────
+External services used at runtime (NOT bundled)
+────────────────────────────────────────────────────────────────────────────
+
+  anginedepoitrine.com           - the monitored vinyl shop (scraped, read-only)
+  Telegram Bot API               - only if NOTIFICATION_METHOD=telegram
+  WhatsApp Web                   - only if NOTIFICATION_METHOD=whatsapp
+  Your configured SMTP provider  - only if NOTIFICATION_METHOD=email
+
+No analytics, telemetry, or third-party logging is used.

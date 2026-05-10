@@ -1,7 +1,7 @@
 "use strict";
 
 const { test } = require("node:test");
-const assert   = require("node:assert/strict");
+const assert = require("node:assert/strict");
 const { validateStateEntry, isValidIsoDate } = require("../lib/state");
 
 // ─── isValidIsoDate ──────────────────────────────────────────
@@ -42,12 +42,12 @@ test("validateStateEntry: null/undefined/primitive returns null", () => {
 
 test("validateStateEntry: valid entry passes through cleanly", () => {
   const entry = {
-    likelyAvailable:   true,
+    likelyAvailable: true,
     likelyUnavailable: false,
-    fingerprint:       "abcd1234",
-    ctaText:           "40,00 C$",
-    checkedAt:         "2024-01-01T00:00:00.000Z",
-    lastNotifiedAt:    "2024-01-01T00:00:00.000Z",
+    fingerprint: "abcd1234",
+    ctaText: "40,00 C$",
+    checkedAt: "2024-01-01T00:00:00.000Z",
+    lastNotifiedAt: "2024-01-01T00:00:00.000Z",
   };
   const r = validateStateEntry(entry);
   assert.equal(r.likelyAvailable, true);
@@ -59,12 +59,12 @@ test("validateStateEntry: valid entry passes through cleanly", () => {
 
 test("validateStateEntry: future lastNotifiedAt is rejected (becomes null)", () => {
   const entry = {
-    likelyAvailable:   false,
+    likelyAvailable: false,
     likelyUnavailable: true,
-    fingerprint:       "abcd",
-    ctaText:           "Indisponible",
-    checkedAt:         "2024-01-01T00:00:00.000Z",
-    lastNotifiedAt:    "2999-01-01T00:00:00.000Z",
+    fingerprint: "abcd",
+    ctaText: "Indisponible",
+    checkedAt: "2024-01-01T00:00:00.000Z",
+    lastNotifiedAt: "2999-01-01T00:00:00.000Z",
   };
   const r = validateStateEntry(entry);
   assert.equal(r.lastNotifiedAt, null);
@@ -72,8 +72,10 @@ test("validateStateEntry: future lastNotifiedAt is rejected (becomes null)", () 
 
 test("validateStateEntry: null lastNotifiedAt stays null", () => {
   const entry = {
-    likelyAvailable: true, likelyUnavailable: false,
-    fingerprint: "x", ctaText: "40 C$",
+    likelyAvailable: true,
+    likelyUnavailable: false,
+    fingerprint: "x",
+    ctaText: "40 C$",
     checkedAt: "2024-01-01T00:00:00.000Z",
     lastNotifiedAt: null,
   };
@@ -82,29 +84,36 @@ test("validateStateEntry: null lastNotifiedAt stays null", () => {
 
 test("validateStateEntry: fingerprint capped at 64 chars", () => {
   const entry = {
-    likelyAvailable: false, likelyUnavailable: true,
+    likelyAvailable: false,
+    likelyUnavailable: true,
     fingerprint: "a".repeat(200),
-    ctaText: "x", checkedAt: "2024-01-01T00:00:00.000Z", lastNotifiedAt: null,
+    ctaText: "x",
+    checkedAt: "2024-01-01T00:00:00.000Z",
+    lastNotifiedAt: null,
   };
   assert.equal(validateStateEntry(entry).fingerprint.length, 64);
 });
 
 test("validateStateEntry: ctaText capped at 200 chars", () => {
   const entry = {
-    likelyAvailable: false, likelyUnavailable: true,
+    likelyAvailable: false,
+    likelyUnavailable: true,
     fingerprint: "a",
     ctaText: "x".repeat(500),
-    checkedAt: "2024-01-01T00:00:00.000Z", lastNotifiedAt: null,
+    checkedAt: "2024-01-01T00:00:00.000Z",
+    lastNotifiedAt: null,
   };
   assert.equal(validateStateEntry(entry).ctaText.length, 200);
 });
 
 test("validateStateEntry: wrong boolean types default safely", () => {
   const entry = {
-    likelyAvailable:   "yes",  // wrong type -> false
-    likelyUnavailable: 1,      // wrong type -> true (default)
-    fingerprint: "x", ctaText: "x",
-    checkedAt: "2024-01-01T00:00:00.000Z", lastNotifiedAt: null,
+    likelyAvailable: "yes", // wrong type -> false
+    likelyUnavailable: 1, // wrong type -> true (default)
+    fingerprint: "x",
+    ctaText: "x",
+    checkedAt: "2024-01-01T00:00:00.000Z",
+    lastNotifiedAt: null,
   };
   const r = validateStateEntry(entry);
   assert.equal(r.likelyAvailable, false);
@@ -113,10 +122,12 @@ test("validateStateEntry: wrong boolean types default safely", () => {
 
 test("validateStateEntry: wrong string types default to empty string", () => {
   const entry = {
-    likelyAvailable: false, likelyUnavailable: true,
-    fingerprint: 12345,  // wrong type -> ""
-    ctaText:     null,   // wrong type -> ""
-    checkedAt: "2024-01-01T00:00:00.000Z", lastNotifiedAt: null,
+    likelyAvailable: false,
+    likelyUnavailable: true,
+    fingerprint: 12345, // wrong type -> ""
+    ctaText: null, // wrong type -> ""
+    checkedAt: "2024-01-01T00:00:00.000Z",
+    lastNotifiedAt: null,
   };
   const r = validateStateEntry(entry);
   assert.equal(r.fingerprint, "");
@@ -125,9 +136,12 @@ test("validateStateEntry: wrong string types default to empty string", () => {
 
 test("validateStateEntry: invalid checkedAt defaults to epoch", () => {
   const entry = {
-    likelyAvailable: false, likelyUnavailable: true,
-    fingerprint: "x", ctaText: "x",
-    checkedAt: "not-a-date", lastNotifiedAt: null,
+    likelyAvailable: false,
+    likelyUnavailable: true,
+    fingerprint: "x",
+    ctaText: "x",
+    checkedAt: "not-a-date",
+    lastNotifiedAt: null,
   };
   assert.equal(validateStateEntry(entry).checkedAt, new Date(0).toISOString());
 });

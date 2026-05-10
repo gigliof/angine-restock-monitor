@@ -1,7 +1,7 @@
 "use strict";
 
 const { test } = require("node:test");
-const assert   = require("node:assert/strict");
+const assert = require("node:assert/strict");
 const { assertAllowedUrl } = require("../lib/fetch");
 
 // ─── assertAllowedUrl ─────────────────────────────────────────
@@ -47,10 +47,7 @@ test("assertAllowedUrl: rejects HTTP (non-HTTPS) URLs", () => {
 });
 
 test("assertAllowedUrl: rejects invalid URL format", () => {
-  assert.throws(
-    () => assertAllowedUrl("not-a-valid-url"),
-    /Invalid URL/
-  );
+  assert.throws(() => assertAllowedUrl("not-a-valid-url"), /Invalid URL/);
 });
 
 test("assertAllowedUrl: URL with multiple @ resolves to last hostname (WHATWG spec)", () => {
@@ -100,19 +97,10 @@ test("assertAllowedUrl: allows URL with non-standard port (same hostname)", () =
 });
 
 test("assertAllowedUrl: handles empty string", () => {
-  assert.throws(
-    () => assertAllowedUrl(""),
-    /Invalid URL/
-  );
+  assert.throws(() => assertAllowedUrl(""), /Invalid URL/);
 });
 
 test("assertAllowedUrl: handles null/undefined (type coercion)", () => {
-  assert.throws(
-    () => assertAllowedUrl(null),
-    /Invalid URL/
-  );
-  assert.throws(
-    () => assertAllowedUrl(undefined),
-    /Invalid URL/
-  );
+  assert.throws(() => assertAllowedUrl(null), /Invalid URL/);
+  assert.throws(() => assertAllowedUrl(undefined), /Invalid URL/);
 });

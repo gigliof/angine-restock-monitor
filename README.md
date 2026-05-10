@@ -1,10 +1,18 @@
 # Angine de Poitrine - Restock Monitor
 
-Monitors the [Angine de Poitrine](https://anginedepoitrine.com) vinyl shop and notifies you the moment sold-out products come back in stock.
+<p align="center">
+  <a href="https://github.com/gigliof/angine-restock-monitor/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/gigliof/angine-restock-monitor/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/gigliof/angine-restock-monitor/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-7c3aed"></a>
+  <a href="https://github.com/gigliof/angine-restock-monitor/issues"><img alt="Issues" src="https://img.shields.io/github/issues/gigliof/angine-restock-monitor"></a>
+  <a href="https://ko-fi.com/gigliof"><img alt="Support on Ko-fi" src="https://img.shields.io/badge/support-ko--fi-FF5E5B?logo=ko-fi&logoColor=white"></a>
+</p>
+
+A self-hosted Node.js script that watches the [Angine de Poitrine](https://anginedepoitrine.com) vinyl shop and notifies you the **moment sold-out products come back in stock** - then optionally drives a headless browser to add the item to cart, fill in your checkout details, and hand you a ready-to-pay PayPal link.
 
 When a restock is detected it:
-1. Sends you a notification (email, Telegram, or WhatsApp) with the product link
-2. Launches a headless browser, adds the item to cart, fills your checkout form, and sends you the checkout URL so you can jump straight to PayPal
+
+1. Sends a notification (email, Telegram, or WhatsApp) with the product link
+2. Launches a headless browser, adds the item to cart, fills your checkout form, and delivers the checkout URL straight to you
 
 ## Products monitored
 
@@ -18,12 +26,13 @@ When a restock is detected it:
 
 - [Node.js](https://nodejs.org/) v18+
 - One of: a Gmail/SMTP account, a Telegram bot, or a WhatsApp account
+- (Optional) Puppeteer for cart automation - installs ~300 MB of Chromium
 
 ---
 
 ## Setup
 
-### 1 - Clone and install
+### 1. Clone and install
 
 ```bash
 git clone https://github.com/gigliof/angine-restock-monitor
@@ -31,15 +40,15 @@ cd angine-restock-monitor
 npm install
 ```
 
-### 2 - Configure
+### 2. Configure
 
 ```bash
 cp .env.example .env
 ```
 
-Open `.env` and fill in your values. See the notification sections below for which fields are required.
+Open `.env` and fill in your values. See the [notification methods](#notification-methods) section for which fields are required.
 
-### 3 - Run the test suite
+### 3. Run the test suite
 
 ```bash
 npm test
@@ -47,13 +56,13 @@ npm test
 
 Runs unit tests for stock detection, state validation, logging, and message formatting. No network access required.
 
-### 4 - Send a test notification
+### 4. Send a test notification
 
 ```bash
 node monitor.js --test
 ```
 
-### 5 - Run
+### 5. Run
 
 ```bash
 # macOS - caffeinate prevents idle sleep while the script runs
@@ -66,7 +75,7 @@ node monitor.js
 node monitor.js --once
 ```
 
-The first run saves a baseline and sends no alerts. From the second check onward it notifies you on any stock change.
+The first run saves a baseline and sends no alerts. From the second check onward, you get notified on any stock change.
 
 ---
 
@@ -90,13 +99,13 @@ EMAIL_TO=you@example.com
 
 > **Gmail App Password:** Go to [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords) and create a password for "Mail". Use that - not your regular Gmail password.
 
-> `EMAIL_FROM` and `EMAIL_TO` are validated at startup. The monitor will exit immediately with a clear error if either address is not a valid email format.
+> `EMAIL_FROM` and `EMAIL_TO` are validated at startup. The monitor exits immediately with a clear error if either address is not a valid email format.
 
 ---
 
-### Telegram (recommended if you want push notifications)
+### Telegram (recommended for push notifications)
 
-No extra dependencies - uses the Telegram Bot API directly via the axios client that is already installed.
+No extra dependencies - uses the Telegram Bot API directly via the axios client that's already installed.
 
 **Setup:**
 
@@ -120,7 +129,7 @@ This verifies your token, lists recent senders with their chat IDs, and tells yo
 TELEGRAM_CHAT_ID=123456789
 ```
 
-> `TELEGRAM_CHAT_ID` must be a numeric ID. Group chat IDs are negative (e.g. `-100123456789`). The monitor will exit at startup with a clear error if the value is not numeric.
+> `TELEGRAM_CHAT_ID` must be a numeric ID. Group chat IDs are negative (e.g. `-100123456789`). The monitor exits at startup if the value is not numeric.
 
 Then run `node monitor.js --test` to confirm the full notification flow works.
 
@@ -147,7 +156,7 @@ Run once to authenticate:
 node monitor.js --test
 ```
 
-Scan the QR in WhatsApp - Settings -> Linked Devices -> Link a Device. Your session is saved locally, no re-scanning needed.
+Scan the QR in WhatsApp → Settings → Linked Devices → Link a Device. Your session is saved locally; no re-scanning needed.
 
 **Troubleshooting:**
 
@@ -155,7 +164,7 @@ Scan the QR in WhatsApp - Settings -> Linked Devices -> Link a Device. Your sess
 node monitor.js --debug-wa
 ```
 
-> This prints your contact list and chat IDs to the terminal. Treat this output as sensitive - do not share it.
+> Prints your contact list and chat IDs to the terminal. Treat this output as sensitive - do not share it.
 
 If auto-resolution fails, copy the chat ID from the output and set it in `.env`:
 
@@ -176,15 +185,15 @@ Signal does not have a public bot API. The only self-hosted option is [signal-cl
 When a restock is detected, the script launches a headless Chromium browser to:
 
 1. Navigate to the product page and click the buy button
-2. Go to cart and click "Proceder au paiement"
+2. Go to cart and click "Procéder au paiement"
 3. Fill in your checkout details from `.env`
 4. Capture the checkout URL and send it to you
 
 You open that URL and complete payment via PayPal yourself.
 
-The checkout URL contains a session token and is sent only via your notification channel - it is never written to the log file.
+The checkout URL contains a session token and is sent only via your notification channel - it is **never written to the log file**.
 
-If any critical step fails (checkout button not found, email field not fillable), the automation aborts cleanly and the notification is sent with the product URL only — you will never receive a broken or incomplete checkout link.
+If any critical step fails (checkout button not found, email field not fillable), the automation aborts cleanly and the notification is sent with the product URL only - you will never receive a broken or incomplete checkout link.
 
 Install Puppeteer to enable this feature:
 
@@ -225,44 +234,49 @@ CHECKOUT_STATE_CODE=ON
 
 ---
 
-## Security notes
+## CLI reference
 
-- **Check cycle timeout** - each monitoring cycle is bounded to 5 minutes; a hung network call cannot stall the scheduler indefinitely
-- **All secrets live in `.env`** - gitignored, never committed
-- **WhatsApp session data** (`.wwebjs_auth/`) is gitignored and created with restricted permissions (owner-only)
-- **All dependencies are version-pinned** - no `^` ranges, no silent auto-upgrades
-  - `axios` pinned to `1.14.0` (see [2026 supply chain incident](https://www.elastic.co/security-labs/axios-one-rat-to-rule-them-all))
-- **URL allowlist** - the script refuses to fetch or navigate to any URL outside `anginedepoitrine.com`
-- **HTTPS required** - all product URLs must use HTTPS; HTTP URLs are rejected at startup and enforced at runtime on every fetch and navigation
-- **Navigation interception** - Puppeteer blocks document navigations to any origin outside `anginedepoitrine.com`, including `data:` and other non-HTTPS schemes; sub-resource requests (XHR, images, scripts) are not filtered, as the site needs them to function
-- **Chromium sandbox** - enabled by default for extra isolation; set `PUPPETEER_NO_SANDBOX=true` only in containerized environments that require it
-- **HTML escaping** - all scraped content is escaped before insertion into the email body
-- **Checkout URL not logged** - session tokens are sent via notification only, never written to disk
-- **Input format validation at startup** - `WA_RECIPIENT_NUMBER` must be E.164 format (e.g. `+15551234567`); `TELEGRAM_CHAT_ID` must be a numeric ID (e.g. `123456789` or `-100123456789` for groups); `CHECKOUT_EMAIL` must be a valid email; `CHECKOUT_PHONE` must be a valid phone format; all checkout fields are length-capped to prevent abuse
-- **Log sanitization** - all external data written to the log file is stripped of ANSI escape sequences and control characters (null bytes, BEL, etc.) and truncated to 200 characters to prevent log injection
-- **Notification cooldown** - configurable minimum time between repeat alerts for the same product (default: 60 min)
-- **Test notification cooldown** - 60 seconds between test notifications to prevent spam
-- **Log rotation** - log file is rotated at 2 MB
-- **Restricted file permissions** - state file and log file are created with owner-only permissions (0600)
-- **Atomic state writes** - state file written via temp-then-rename to prevent corruption on crash
-- **No unexpected third-party services** - notifications go only to the provider you configure (Gmail/SMTP, Telegram, or WhatsApp). No analytics, no telemetry, no external logging.
-- **Cart automation trust model** - when cart automation is enabled, your checkout details (name, address, phone, email) are typed into `anginedepoitrine.com` by a real browser. The site can read those values. Only enable cart automation if you trust the site.
-- **Response size cap** - HTTP responses are capped at 5 MB; a server returning an unexpectedly large body is rejected rather than buffered into memory
-- **JSON-LD size cap** - JSON-LD blocks larger than 100KB are skipped to prevent slowdowns from oversized payloads
+| Command                            | Description                                                    |
+| ---------------------------------- | -------------------------------------------------------------- |
+| `node monitor.js`                  | Start monitoring (loops indefinitely)                          |
+| `node monitor.js --once`           | Run one check cycle and exit                                   |
+| `node monitor.js --test`           | Send a test notification (60s cooldown between tests)          |
+| `node monitor.js --test --force`   | Send a test notification (bypass cooldown)                     |
+| `node monitor.js --dry-run`        | Run detection without sending notifications or cart automation |
+| `node monitor.js --clear-cooldown` | Reset notification cooldown for all products                   |
+| `node monitor.js --debug-telegram` | Verify Telegram token and find chat ID                         |
+| `node monitor.js --debug-wa`       | Diagnose WhatsApp connection issues                            |
+| `node monitor.js --help`           | Show help message with all options                             |
 
 ---
 
-## CLI reference
+## Security
 
-| Command | Description |
-|---------|-------------|
-| `node monitor.js` | Start monitoring (loops indefinitely) |
-| `node monitor.js --once` | Run one check cycle and exit |
-| `node monitor.js --test` | Send a test notification (60s cooldown between tests) |
-| `node monitor.js --test --force` | Send a test notification (bypass cooldown) |
-| `node monitor.js --dry-run` | Run detection without sending notifications or cart automation |
-| `node monitor.js --clear-cooldown` | Reset notification cooldown for all products |
-| `node monitor.js --debug-telegram` | Verify Telegram token and find chat ID |
-| `node monitor.js --debug-wa` | Diagnose WhatsApp connection issues |
-| `node monitor.js --help` | Show help message with all options |
+This script handles notification credentials, browser-driven checkout automation, and untrusted HTML scraped from a third-party site - non-trivial attack surface for a tool you'll leave running unattended. The full threat model and the hardening already in place are documented in [SECURITY.md](SECURITY.md). Highlights:
 
+- **URL allowlist + HTTPS-only** - all fetches and Puppeteer navigation are restricted to `anginedepoitrine.com`
+- **All dependencies version-pinned** - including `axios` pinned to `1.14.0` after the [2026 supply chain incident](https://www.elastic.co/security-labs/axios-one-rat-to-rule-them-all)
+- **Secrets stay in `.env`** - gitignored; state and log files written with owner-only permissions (0600)
+- **Checkout URLs never logged** - session tokens delivered via your notification channel only
+- **Input validation at startup** - bad email, phone, chat ID, or country code → immediate exit with a clear error
+- **HTML escaping + log sanitization** - scraped content is escaped before email and stripped of control characters before logging
+
+Found a vulnerability? Please report it privately via [GitHub Security Advisories](https://github.com/gigliof/angine-restock-monitor/security/advisories/new) rather than a public issue.
+
+---
+
+## Contributing
+
+PRs welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for the dev quick-start, project layout, and what CI checks before merge.
+
+---
+
+## Support
+
+If this tool helped you snag a vinyl, consider [buying me a coffee on Ko-fi ☕](https://ko-fi.com/gigliof). Every bit helps keep the project maintained.
+
+---
+
+## License
+
+[MIT](LICENSE) - see [NOTICE](NOTICE) for third-party attribution.

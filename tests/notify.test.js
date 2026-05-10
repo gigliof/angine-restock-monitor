@@ -1,22 +1,22 @@
 "use strict";
 
 const { test } = require("node:test");
-const assert   = require("node:assert/strict");
+const assert = require("node:assert/strict");
 const { buildMessages, esc, escTg } = require("../lib/notify");
 
 const PRODUCT = {
   name: "Angine de Poitrine - Vol. 1 (Vinyle)",
-  url:  "https://anginedepoitrine.com/product/1150712-angine-de-poitrine-vol-1-vinyle",
+  url: "https://anginedepoitrine.com/product/1150712-angine-de-poitrine-vol-1-vinyle",
 };
 
 // ─── esc ─────────────────────────────────────────────────────
 
 test("esc: escapes all five HTML special chars", () => {
-  assert.equal(esc("&"),  "&amp;");
-  assert.equal(esc("<"),  "&lt;");
-  assert.equal(esc(">"),  "&gt;");
-  assert.equal(esc('"'),  "&quot;");
-  assert.equal(esc("'"),  "&#39;");
+  assert.equal(esc("&"), "&amp;");
+  assert.equal(esc("<"), "&lt;");
+  assert.equal(esc(">"), "&gt;");
+  assert.equal(esc('"'), "&quot;");
+  assert.equal(esc("'"), "&#39;");
 });
 
 test("esc: escapes XSS payload", () => {
@@ -78,14 +78,14 @@ test("buildMessages: plain with checkout URL includes it", () => {
 });
 
 test("buildMessages: HTML escapes product name (XSS prevention)", () => {
-  const malicious = { name: '<img src=x onerror=alert(1)>', url: PRODUCT.url };
+  const malicious = { name: "<img src=x onerror=alert(1)>", url: PRODUCT.url };
   const m = buildMessages(malicious, "reason", null);
   assert.ok(!m.html.includes("<img"));
   assert.ok(m.html.includes("&lt;img"));
 });
 
 test("buildMessages: HTML escapes reason field", () => {
-  const m = buildMessages(PRODUCT, '<script>evil()</script>', null);
+  const m = buildMessages(PRODUCT, "<script>evil()</script>", null);
   assert.ok(!m.html.includes("<script>"));
   assert.ok(m.html.includes("&lt;script&gt;"));
 });
