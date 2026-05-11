@@ -1,7 +1,7 @@
 {
   "name": "angine-de-poitrine-restock-monitor",
   "version": "1.0.0",
-  "description": "Restock monitor for anginedepoitrine.com vinyl products.",
+  "description": "Self-hosted restock monitor for anginedepoitrine.com vinyl. Notifies you the moment sold-out products come back, and optionally drives Puppeteer through checkout.",
   "main": "monitor.js",
   "scripts": {
     "start": "node monitor.js",

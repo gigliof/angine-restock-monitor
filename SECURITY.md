@@ -37,7 +37,7 @@ You'll get a response within a few days. There's no formal embargo policy given 
 
 ## Hardening already in place
 
-This is documented in detail in the [README's security notes section](README.md#security-notes), but the highlights:
+The README has a [shorter recap with the same highlights](README.md#security); the long-form version follows:
 
 - **URL allowlist** - fetch and Puppeteer navigation are restricted to `anginedepoitrine.com`; HTTPS is enforced
 - **All dependencies version-pinned** (no `^`, no `~`) - the [2026 axios supply chain incident](https://www.elastic.co/security-labs/axios-one-rat-to-rule-them-all) is why even widely-trusted packages get explicit version control here
