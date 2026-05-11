@@ -40,7 +40,7 @@ You'll get a response within a few days. There's no formal embargo policy given 
 This is documented in detail in the [README's security notes section](README.md#security-notes), but the highlights:
 
 - **URL allowlist** - fetch and Puppeteer navigation are restricted to `anginedepoitrine.com`; HTTPS is enforced
-- **All dependencies version-pinned** - including `axios` pinned to `1.14.0` after the [2026 supply chain incident](https://www.elastic.co/security-labs/axios-one-rat-to-rule-them-all)
+- **All dependencies version-pinned** (no `^`, no `~`) - the [2026 axios supply chain incident](https://www.elastic.co/security-labs/axios-one-rat-to-rule-them-all) is why even widely-trusted packages get explicit version control here
 - **Secrets stay in `.env`** - gitignored; the state file and log file are written with owner-only permissions (0600)
 - **Checkout URLs are never logged** - they contain a session token and are sent only via your configured notification channel
 - **Input validation at startup** - bad email/phone/chat-ID/country-code values cause immediate exit with a clear error

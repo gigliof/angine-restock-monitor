@@ -81,6 +81,8 @@ The first run saves a baseline and sends no alerts. From the second check onward
 
 ## Notification methods
 
+> **Heads-up:** Email is the channel I personally use and verify before each release. Telegram and WhatsApp are supported and unit-tested at the message-formatting level, but their live delivery paths (SMTP-style libraries aside) aren't part of my regular smoke tests. If you use those channels and something breaks - especially after a dependency bump - please [open an issue](https://github.com/gigliof/angine-restock-monitor/issues/new/choose).
+
 ### Email (recommended)
 
 Simplest and most reliable. Works with Gmail, iCloud, Outlook (with app password), or any SMTP provider.
@@ -255,7 +257,7 @@ CHECKOUT_STATE_CODE=ON
 This script handles notification credentials, browser-driven checkout automation, and untrusted HTML scraped from a third-party site - non-trivial attack surface for a tool you'll leave running unattended. The full threat model and the hardening already in place are documented in [SECURITY.md](SECURITY.md). Highlights:
 
 - **URL allowlist + HTTPS-only** - all fetches and Puppeteer navigation are restricted to `anginedepoitrine.com`
-- **All dependencies version-pinned** - including `axios` pinned to `1.14.0` after the [2026 supply chain incident](https://www.elastic.co/security-labs/axios-one-rat-to-rule-them-all)
+- **All dependencies version-pinned** (no `^`, no `~`) - the [2026 axios supply chain incident](https://www.elastic.co/security-labs/axios-one-rat-to-rule-them-all) is why even widely-trusted packages get explicit version control here
 - **Secrets stay in `.env`** - gitignored; state and log files written with owner-only permissions (0600)
 - **Checkout URLs never logged** - session tokens delivered via your notification channel only
 - **Input validation at startup** - bad email, phone, chat ID, or country code → immediate exit with a clear error

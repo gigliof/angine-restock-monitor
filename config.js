@@ -3,7 +3,7 @@
 //  No secrets or personal info live here. Safe to commit.
 // ============================================================
 
-require("dotenv").config();
+require("dotenv").config({ quiet: true });
 const { sanitizeLog } = require("./lib/logger");
 
 // ─── Constants ────────────────────────────────────────────────
