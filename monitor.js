@@ -219,11 +219,15 @@ async function runTest() {
   if (!args.force) {
     try {
       const lastTest = parseInt(fs.readFileSync(TEST_COOLDOWN_FILE, "utf-8"), 10);
-      const elapsed = Date.now() - lastTest;
-      if (elapsed < TEST_COOLDOWN_MS) {
-        const waitSec = Math.ceil((TEST_COOLDOWN_MS - elapsed) / 1000);
-        log("Test cooldown active. Wait " + waitSec + " seconds or use --force to bypass.");
-        return;
+      // Treat NaN / non-finite as "no previous test" rather than letting
+      // NaN comparisons silently bypass the cooldown.
+      if (Number.isFinite(lastTest)) {
+        const elapsed = Date.now() - lastTest;
+        if (elapsed < TEST_COOLDOWN_MS) {
+          const waitSec = Math.ceil((TEST_COOLDOWN_MS - elapsed) / 1000);
+          log("Test cooldown active. Wait " + waitSec + " seconds or use --force to bypass.");
+          return;
+        }
       }
     } catch (_) {
       // File doesn't exist - first test, proceed.

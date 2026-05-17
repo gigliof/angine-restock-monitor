@@ -254,14 +254,7 @@ CHECKOUT_STATE_CODE=ON
 
 ## Security
 
-This script handles notification credentials, browser-driven checkout automation, and untrusted HTML scraped from a third-party site - non-trivial attack surface for a tool you'll leave running unattended. The full threat model and the hardening already in place are documented in [SECURITY.md](SECURITY.md). Highlights:
-
-- **URL allowlist + HTTPS-only** - all fetches and Puppeteer navigation are restricted to `anginedepoitrine.com`
-- **All dependencies version-pinned** (no `^`, no `~`) - the [2026 axios supply chain incident](https://www.elastic.co/security-labs/axios-one-rat-to-rule-them-all) is why even widely-trusted packages get explicit version control here
-- **Secrets stay in `.env`** - gitignored; state and log files written with owner-only permissions (0600)
-- **Checkout URLs never logged** - session tokens delivered via your notification channel only
-- **Input validation at startup** - bad email, phone, chat ID, or country code → immediate exit with a clear error
-- **HTML escaping + log sanitization** - scraped content is escaped before email and stripped of control characters before logging
+This script handles notification credentials, browser-driven checkout automation, and untrusted HTML scraped from a third-party site - non-trivial attack surface for a tool you'll leave running unattended. The threat model and reporting process are documented in [SECURITY.md](SECURITY.md).
 
 Found a vulnerability? Please report it privately via [GitHub Security Advisories](https://github.com/gigliof/angine-restock-monitor/security/advisories/new) rather than a public issue.
 

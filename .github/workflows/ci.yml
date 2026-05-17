@@ -6,21 +6,29 @@ on:
   pull_request:
     branches: [main]
 
+# Principle of least privilege: CI only needs to read the repo.
+permissions:
+  contents: read
+
 jobs:
   test:
     name: Lint, format & test
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
         with:
           node-version: 20
           cache: npm
 
+      # --ignore-scripts skips lifecycle scripts (postinstall, prepare, etc.)
+      # of all dependencies during CI install. Defends against a compromised
+      # transitive dep running arbitrary code on install. The test suite does
+      # not need any lifecycle scripts (no native modules, no Chromium launch).
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --ignore-scripts
 
       - name: Seed dummy .env for tests
         run: cp .env.example .env

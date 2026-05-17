@@ -34,17 +34,3 @@ Use **GitHub's private vulnerability reporting**:
 3. Fill in the details - steps to reproduce, impact, any suggested fix
 
 You'll get a response within a few days. There's no formal embargo policy given the nature of this project, but please give a reasonable heads-up before going public.
-
-## Hardening already in place
-
-The README has a [shorter recap with the same highlights](README.md#security); the long-form version follows:
-
-- **URL allowlist** - fetch and Puppeteer navigation are restricted to `anginedepoitrine.com`; HTTPS is enforced
-- **All dependencies version-pinned** (no `^`, no `~`) - the [2026 axios supply chain incident](https://www.elastic.co/security-labs/axios-one-rat-to-rule-them-all) is why even widely-trusted packages get explicit version control here
-- **Secrets stay in `.env`** - gitignored; the state file and log file are written with owner-only permissions (0600)
-- **Checkout URLs are never logged** - they contain a session token and are sent only via your configured notification channel
-- **Input validation at startup** - bad email/phone/chat-ID/country-code values cause immediate exit with a clear error
-- **HTML escaping** - all scraped strings are escaped before insertion into email bodies
-- **Log sanitization** - ANSI escapes and control characters are stripped from anything written to the log
-- **Response and JSON-LD size caps** - oversized payloads from the upstream site are rejected, not buffered
-- **Cycle timeout** - each monitoring cycle is bounded; a hung network call cannot stall the scheduler indefinitely
