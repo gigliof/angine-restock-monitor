@@ -135,6 +135,81 @@ test("detectStock: identical HTML produces same fingerprint", () => {
   assert.equal(detectStock(html).fingerprint, detectStock(html).fingerprint);
 });
 
+// ─── detectStock: salable-item form (2026 redesign) ──────────
+
+// Mirrors the real out-of-stock markup: tracked inventory at 0 + state classes.
+const FORM_OOS = `
+  <form data-min-price="40.0" data-track-inventory="true" data-inventory="0"
+        data-controller="inventory-form cart--salable-item"
+        class="store_item salable-item not-in-cart not-available with-quantity out-of-stock"
+        action="/api/cart_items">
+    <input type="hidden" name="authenticity_token" value="TOKEN_A">
+    <a class="button if-in-cart">Ajouté au panier</a>
+    <em class="unless-available text-secondary">Indisponible</em>
+    <em class="if-out-of-stock text-secondary">En rupture de stock</em>
+  </form>
+  <div class="product-price text-main">Indisponible</div>`;
+
+// Synthesized in-stock markup: positive inventory, OOS classes dropped.
+const FORM_IN_STOCK = `
+  <form data-min-price="40.0" data-track-inventory="true" data-inventory="3"
+        data-controller="inventory-form cart--salable-item"
+        class="store_item salable-item not-in-cart with-quantity in-stock"
+        action="/api/cart_items">
+    <input type="hidden" name="authenticity_token" value="TOKEN_B">
+    <em class="if-available">Ajouter au panier</em>
+  </form>
+  <div class="product-price text-main">40,00 C$</div>`;
+
+test("detectStock: form data-inventory=0 -> unavailable", () => {
+  const r = detectStock(FORM_OOS);
+  assert.equal(r.likelyAvailable, false);
+  assert.equal(r.likelyUnavailable, true);
+  assert.equal(r.ctaText, "Indisponible");
+});
+
+test("detectStock: form data-inventory>0 -> available", () => {
+  const r = detectStock(FORM_IN_STOCK);
+  assert.equal(r.likelyAvailable, true);
+  assert.equal(r.likelyUnavailable, false);
+});
+
+test("detectStock: form takes priority over a stale legacy CTA", () => {
+  // Form says in stock (inventory 3); a leftover a[href="#!"] says Indisponible.
+  // The authoritative form signal must win.
+  const r = detectStock(FORM_IN_STOCK + '<a href="#!">Indisponible</a>');
+  assert.equal(r.likelyAvailable, true);
+});
+
+test("detectStock: untracked inventory + out-of-stock class -> unavailable", () => {
+  const html = `<form class="salable-item out-of-stock" data-track-inventory="false"
+                      data-controller="inventory-form"></form>`;
+  const r = detectStock(html);
+  assert.equal(r.likelyUnavailable, true);
+  assert.equal(r.likelyAvailable, false);
+});
+
+test("detectStock: untracked inventory + no OOS class -> available", () => {
+  const html = `<form class="salable-item with-quantity" data-track-inventory="false"
+                      data-controller="inventory-form"></form>`;
+  const r = detectStock(html);
+  assert.equal(r.likelyAvailable, true);
+});
+
+test("detectStock: fingerprint is STABLE across changing CSRF token", () => {
+  // The per-request authenticity_token must not affect the fingerprint, or every
+  // fetch would look like a "page changed" event.
+  const a = detectStock(FORM_OOS);
+  const b = detectStock(FORM_OOS.replace("TOKEN_A", "TOTALLY_DIFFERENT_TOKEN_XYZ"));
+  assert.equal(a.fingerprint, b.fingerprint);
+});
+
+test("detectStock: fingerprint changes when inventory transitions 0 -> in stock", () => {
+  const oos = detectStock(FORM_OOS);
+  const inStock = detectStock(FORM_IN_STOCK);
+  assert.notEqual(oos.fingerprint, inStock.fingerprint);
+});
+
 // ─── extractCtaRegion ─────────────────────────────────────────
 
 test("extractCtaRegion: caps each element at 500 chars", () => {
