@@ -20,7 +20,7 @@
     "axios": "1.16.1",
     "cheerio": "1.2.0",
     "dotenv": "17.4.2",
-    "nodemailer": "8.0.8"
+    "nodemailer": "8.0.10"
   },
   "optionalDependencies": {
     "puppeteer": "25.0.4",
