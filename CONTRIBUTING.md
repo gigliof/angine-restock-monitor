@@ -16,8 +16,9 @@ node monitor.js --once   # run a single check cycle
 - `monitor.js` - entry point and main loop (CLI flags, scheduler, restock detection)
 - `config.js` - env validation and configuration loading (fail fast on bad input)
 - `lib/` - internal modules
-  - `notify-*.js` - email, Telegram, WhatsApp notification adapters
-  - `cart.js` - Puppeteer-driven checkout automation (optional)
+  - `fetch.js` - HTTPS client with URL allowlist; fetches the Shopify product JSON
+  - `stock.js` - parses the Shopify product JSON into stock signals
+  - `notify.js` - email, Telegram, WhatsApp notification adapters
   - `state.js` - atomic state-file reads/writes
   - `logger.js` - file logging with rotation and sanitization
 - `tests/` - unit tests, run with the built-in `node --test` runner
@@ -26,11 +27,11 @@ The project is intentionally a single Node script, not a framework. Keep it that
 
 ## Conventions
 
-- **No new top-level dependencies without a clear reason.** Most additions can be done with `https`, `cheerio`, or `axios`, which are already pinned.
+- **No new top-level dependencies without a clear reason.** Most additions can be done with `https` or `axios`, which is already pinned.
 - **All deps are version-pinned** (no `^`, no `~`). Dependabot proposes upgrades; we review them.
 - **No `any`-style escapes.** This is plain JS - favor small, well-named functions over clever one-liners.
 - **Validate at startup, not at call site.** Bad config should make the process exit immediately with a clear error, not blow up mid-run.
-- **All scraped content is treated as untrusted.** HTML-escape before email; sanitize before logging; reject anything outside the URL allowlist.
+- **All data from the shop is treated as untrusted.** HTML-escape before email; sanitize before logging; reject anything outside the URL allowlist.
 
 ## Before opening a PR
 
@@ -48,7 +49,6 @@ Include:
 - Node.js version (`node --version`)
 - OS
 - Notification method you're using (email / Telegram / WhatsApp)
-- Whether cart automation is enabled
 - Steps to reproduce
 - Relevant log output from `monitor.log` (with secrets redacted)
 

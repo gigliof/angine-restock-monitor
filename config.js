@@ -67,11 +67,7 @@ if (!NOTIFICATION_METHODS.includes(method)) {
   process.exit(1);
 }
 
-// Set ENABLE_CART_AUTOMATION=false to skip checkout field requirements and disable
-// browser automation entirely (pure notification mode).
-const cartEnabled = optional("ENABLE_CART_AUTOMATION", "true") === "true";
-
-// Allowed base URL and hostname - Puppeteer will refuse to navigate anywhere else.
+// Allowed base URL and hostname - fetches are refused for any other host.
 const ALLOWED_ORIGIN = "https://anginedepoitrine.com/";
 const ALLOWED_HOSTNAME = "anginedepoitrine.com";
 
@@ -182,37 +178,9 @@ module.exports = {
     return { botToken, chatId };
   })(),
 
-  // null when cart automation is disabled - callers check for null before running automation.
-  checkoutDetails: cartEnabled
-    ? (() => {
-        const email = required("CHECKOUT_EMAIL");
-        if (!isValidEmail(email)) {
-          console.error("[config] CHECKOUT_EMAIL is not a valid email: " + sanitizeLog(email));
-          process.exit(1);
-        }
-        const phone = required("CHECKOUT_PHONE");
-        if (phone.length > 30 || !/^\+?[\d\s\-().]{6,30}$/.test(phone)) {
-          console.error("[config] CHECKOUT_PHONE format looks invalid: " + sanitizeLog(phone));
-          process.exit(1);
-        }
-        return {
-          email,
-          firstName: required("CHECKOUT_FIRST_NAME").slice(0, 100),
-          lastName: required("CHECKOUT_LAST_NAME").slice(0, 100),
-          address1: required("CHECKOUT_ADDRESS").slice(0, 200),
-          city: required("CHECKOUT_CITY").slice(0, 100),
-          postalCode: required("CHECKOUT_POSTAL_CODE").slice(0, 20),
-          phone,
-          country: required("CHECKOUT_COUNTRY").slice(0, 60),
-          countryCode: required("CHECKOUT_COUNTRY_CODE").slice(0, 5),
-          state: required("CHECKOUT_STATE").slice(0, 60),
-          stateCode: required("CHECKOUT_STATE_CODE").slice(0, 5),
-        };
-      })()
-    : null,
-
-  // Puppeteer sandbox settings. Set to true in containerized environments that require it.
-  // When false (default), Chromium's sandbox provides an extra security layer.
+  // Chromium sandbox toggle for the WhatsApp client's bundled browser. Set to true
+  // only in containerized environments (Docker/CI) where the sandbox can't run.
+  // When false (default), the sandbox provides an extra security layer.
   puppeteerNoSandbox: optionalBool("PUPPETEER_NO_SANDBOX", false),
 
   products,

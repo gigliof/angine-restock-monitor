@@ -7,12 +7,9 @@
   <a href="https://ko-fi.com/gigliof"><img alt="Support on Ko-fi" src="https://img.shields.io/badge/support-ko--fi-FF5E5B?logo=ko-fi&logoColor=white"></a>
 </p>
 
-A self-hosted Node.js script that watches the [Angine de Poitrine](https://anginedepoitrine.com) vinyl shop and notifies you the **moment sold-out products come back in stock** - then optionally drives a headless browser to add the item to cart, fill in your checkout details, and hand you a ready-to-pay PayPal link.
+A self-hosted Node.js script that watches the [Angine de Poitrine](https://anginedepoitrine.com) vinyl shop and notifies you the **moment sold-out products come back in stock**.
 
-When a restock is detected it:
-
-1. Sends a notification (email, Telegram, or WhatsApp) with the product link
-2. Launches a headless browser, adds the item to cart, fills your checkout form, and delivers the checkout URL straight to you
+When a restock is detected it sends you a notification (email, Telegram, or WhatsApp) with a direct link to the product page, so you can grab it before it sells out again. Stock is read from the shop's Shopify product JSON, so detection is exact - no fragile HTML scraping.
 
 ## Products monitored
 
@@ -26,7 +23,6 @@ When a restock is detected it:
 
 - [Node.js](https://nodejs.org/) v18+
 - One of: a Gmail/SMTP account, a Telegram bot, or a WhatsApp account
-- (Optional) Puppeteer for cart automation - installs ~300 MB of Chromium
 
 ---
 
@@ -182,79 +178,25 @@ Signal does not have a public bot API. The only self-hosted option is [signal-cl
 
 ---
 
-## Cart automation
-
-When a restock is detected, the script launches a headless Chromium browser to:
-
-1. Navigate to the product page and click the buy button
-2. Go to cart and click "Procéder au paiement"
-3. Fill in your checkout details from `.env`
-4. Capture the checkout URL and send it to you
-
-You open that URL and complete payment via PayPal yourself.
-
-The checkout URL contains a session token and is sent only via your notification channel - it is **never written to the log file**.
-
-If any critical step fails (checkout button not found, email field not fillable), the automation aborts cleanly and the notification is sent with the product URL only - you will never receive a broken or incomplete checkout link.
-
-Install Puppeteer to enable this feature:
-
-```bash
-npm install puppeteer
-```
-
-Without Puppeteer, the script still monitors and notifies - it just skips the cart automation step and sends the product URL only.
-
-To disable cart automation entirely (and skip the `CHECKOUT_*` fields in `.env`), set:
-
-```env
-ENABLE_CART_AUTOMATION=false
-```
-
----
-
-## Checkout details
-
-Fill in your shipping info in `.env`. These are used to pre-fill the checkout form when a restock fires. They are only required when `ENABLE_CART_AUTOMATION=true` (the default). Set `ENABLE_CART_AUTOMATION=false` to skip them entirely.
-
-```env
-CHECKOUT_EMAIL=you@example.com
-CHECKOUT_FIRST_NAME=Firstname
-CHECKOUT_LAST_NAME=Lastname
-CHECKOUT_ADDRESS=123 Your Street
-CHECKOUT_CITY=Your City
-CHECKOUT_POSTAL_CODE=A1B 2C3
-CHECKOUT_PHONE=+11234567890
-CHECKOUT_COUNTRY=Canada
-CHECKOUT_COUNTRY_CODE=CA
-CHECKOUT_STATE=Ontario
-CHECKOUT_STATE_CODE=ON
-```
-
-`CHECKOUT_COUNTRY_CODE` is the ISO 3166-1 alpha-2 code (e.g. `CA`, `US`, `DE`, `FR`).
-`CHECKOUT_STATE_CODE` is the ISO 3166-2 subdivision code (e.g. `ON`, `CA`, `BE`, `IDF`).
-
----
-
 ## CLI reference
 
-| Command                            | Description                                                    |
-| ---------------------------------- | -------------------------------------------------------------- |
-| `node monitor.js`                  | Start monitoring (loops indefinitely)                          |
-| `node monitor.js --once`           | Run one check cycle and exit                                   |
-| `node monitor.js --test`           | Send a test notification (60s cooldown between tests)          |
-| `node monitor.js --test --force`   | Send a test notification (bypass cooldown)                     |
-| `node monitor.js --dry-run`        | Run detection without sending notifications or cart automation |
-| `node monitor.js --clear-cooldown` | Reset notification cooldown for all products                   |
-| `node monitor.js --debug-telegram` | Verify Telegram token and find chat ID                         |
-| `node monitor.js --debug-wa`       | Diagnose WhatsApp connection issues                            |
-| `node monitor.js --help`           | Show help message with all options                             |
+| Command                            | Description                                           |
+| ---------------------------------- | ----------------------------------------------------- |
+| `node monitor.js`                  | Start monitoring (loops indefinitely)                 |
+| `node monitor.js --once`           | Run one check cycle and exit                          |
+| `node monitor.js --test`           | Send a test notification (60s cooldown between tests) |
+| `node monitor.js --test --force`   | Send a test notification (bypass cooldown)            |
+| `node monitor.js --dry-run`        | Run detection without sending notifications           |
+| `node monitor.js --clear-cooldown` | Reset notification cooldown for all products          |
+| `node monitor.js --debug-telegram` | Verify Telegram token and find chat ID                |
+| `node monitor.js --debug-wa`       | Diagnose WhatsApp connection issues                   |
+| `node monitor.js --help`           | Show help message with all options                    |
 
 ---
 
 ## Security
 
-This script handles notification credentials, browser-driven checkout automation, and untrusted HTML scraped from a third-party site - non-trivial attack surface for a tool you'll leave running unattended. The threat model and reporting process are documented in [SECURITY.md](SECURITY.md).
+This script handles notification credentials and talks to a third-party site you don't control - some attack surface for a tool you'll leave running unattended. The threat model and reporting process are documented in [SECURITY.md](SECURITY.md).
 
 Found a vulnerability? Please report it privately via [GitHub Security Advisories](https://github.com/gigliof/angine-restock-monitor/security/advisories/new) rather than a public issue.
 

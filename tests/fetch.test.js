@@ -14,7 +14,7 @@ test("assertAllowedUrl: allows valid URL with correct hostname", () => {
 
 test("assertAllowedUrl: allows URL with path and query string", () => {
   assert.doesNotThrow(() => {
-    assertAllowedUrl("https://anginedepoitrine.com/go/cart?session=abc123");
+    assertAllowedUrl("https://anginedepoitrine.com/products/vinyle-vol-i?variant=42");
   });
 });
 

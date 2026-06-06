@@ -36,7 +36,7 @@ Options:
   --once             Run one check cycle and exit
   --test             Send a test notification (60s cooldown, use --force to bypass)
   --force            Bypass cooldowns (use with --test)
-  --dry-run          Run detection without sending notifications or cart automation
+  --dry-run          Run detection without sending notifications
   --clear-cooldown   Reset notification cooldown for all products
   --debug-telegram   Verify Telegram token and find chat ID
   --debug-wa         Diagnose WhatsApp connection issues
@@ -61,7 +61,6 @@ const { log, sanitizeLog } = require("./lib/logger");
 const { loadStates, saveStates, STATE_FIELD_MAX } = require("./lib/state");
 const { detectStock } = require("./lib/stock");
 const { fetchProductJson } = require("./lib/fetch");
-const { addToCartAndGetCheckoutUrl, loadPuppeteer, closeBrowser } = require("./lib/cart");
 const { notify, initWhatsApp, runDebugTelegram, runDebugWA } = require("./lib/notify");
 
 const INTER_CHECK_DELAY = 2000; // ms between product checks in one cycle
@@ -166,22 +165,14 @@ async function checkProduct(product, states, dryRun = false) {
 
     log("  *** RESTOCK DETECTED: " + product.name + " ***");
 
-    // In dry-run mode, log what would happen but don't send notifications or run cart automation.
+    // In dry-run mode, log what would happen but don't send notifications.
     if (dryRun) {
       log("  [DRY-RUN] Would send notification: " + reasons.join(" "));
-      if (result.likelyAvailable && config.checkoutDetails) {
-        log("  [DRY-RUN] Would run cart automation for: " + product.url);
-      }
       states[key] = current;
       return;
     }
 
-    let checkoutUrl = null;
-    if (result.likelyAvailable && config.checkoutDetails) {
-      log("  Running cart automation...");
-      checkoutUrl = await addToCartAndGetCheckoutUrl(product.url, product.name);
-    }
-    const notified = await notify(product, reasons.join(" "), checkoutUrl);
+    const notified = await notify(product, reasons.join(" "));
     if (notified) current.lastNotifiedAt = now.toISOString();
   }
 
@@ -245,9 +236,8 @@ async function runTest() {
   if (config.notificationMethod === "whatsapp") await initWhatsApp();
 
   await notify(
-    { name: "TEST PRODUCT", url: config.allowedOrigin + "boutique" },
-    "This is a test - your monitor is configured correctly.",
-    config.allowedOrigin + "go/cart?purchase=TEST"
+    { name: "TEST PRODUCT", url: config.allowedOrigin + "pages/boutique" },
+    "This is a test - your monitor is configured correctly."
   );
 
   // Record last test time.
@@ -290,18 +280,7 @@ async function main() {
   log("  Interval:    every " + config.checkIntervalMinutes + " min");
   log("  Cooldown:    " + config.notificationCooldownMinutes + " min between alerts");
   log("  Products:    " + config.products.length);
-  log(
-    "  Cart auto:   " +
-      (config.checkoutDetails ? "enabled" : "disabled (set ENABLE_CART_AUTOMATION=true to enable)")
-  );
   log("====================================================");
-
-  try {
-    loadPuppeteer();
-    log("  Puppeteer: OK");
-  } catch (_) {
-    log("  Puppeteer: NOT FOUND (cart automation disabled)");
-  }
 
   if (config.notificationMethod === "whatsapp") {
     log("Initializing WhatsApp...");
@@ -336,12 +315,9 @@ async function main() {
 }
 
 // ─── Graceful shutdown ───────────────────────────────────────
-// Closes any in-flight Puppeteer browser before exiting so Chromium
-// is not left as a zombie process on Ctrl+C or SIGTERM.
 
 async function shutdown(signal) {
   log("Received " + signal + " - shutting down.");
-  await closeBrowser();
   process.exit(0);
 }
 

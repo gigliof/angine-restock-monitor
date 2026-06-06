@@ -6,7 +6,7 @@ const { buildMessages, esc, escTg } = require("../lib/notify");
 
 const PRODUCT = {
   name: "Angine de Poitrine - Vol. 1 (Vinyle)",
-  url: "https://anginedepoitrine.com/product/1150712-angine-de-poitrine-vol-1-vinyle",
+  url: "https://anginedepoitrine.com/products/vinyle-vol-i",
 };
 
 // ─── esc ─────────────────────────────────────────────────────
@@ -53,60 +53,40 @@ test("escTg: does not escape single quotes (not used as attribute delimiters)", 
 // ─── buildMessages ───────────────────────────────────────────
 
 test("buildMessages: subject prefixed with RESTOCK", () => {
-  const m = buildMessages(PRODUCT, "reason", null);
+  const m = buildMessages(PRODUCT, "reason");
   assert.ok(m.subject.startsWith("RESTOCK:"));
   assert.ok(m.subject.includes(PRODUCT.name));
 });
 
 test("buildMessages: plain contains product name and URL", () => {
-  const m = buildMessages(PRODUCT, "CTA changed", null);
+  const m = buildMessages(PRODUCT, "stock changed");
   assert.ok(m.plain.includes(PRODUCT.name));
   assert.ok(m.plain.includes(PRODUCT.url));
 });
 
-test("buildMessages: plain without checkout URL says add manually", () => {
-  const m = buildMessages(PRODUCT, "CTA changed", null);
-  assert.ok(m.plain.includes("Add to cart manually"));
-  assert.ok(!m.plain.includes("Checkout:"));
-});
-
-test("buildMessages: plain with checkout URL includes it", () => {
-  const checkoutUrl = "https://anginedepoitrine.com/go/checkout?session=abc";
-  const m = buildMessages(PRODUCT, "CTA changed", checkoutUrl);
-  assert.ok(m.plain.includes("Checkout:"));
-  assert.ok(m.plain.includes(checkoutUrl));
-});
-
 test("buildMessages: HTML escapes product name (XSS prevention)", () => {
   const malicious = { name: "<img src=x onerror=alert(1)>", url: PRODUCT.url };
-  const m = buildMessages(malicious, "reason", null);
+  const m = buildMessages(malicious, "reason");
   assert.ok(!m.html.includes("<img"));
   assert.ok(m.html.includes("&lt;img"));
 });
 
 test("buildMessages: HTML escapes reason field", () => {
-  const m = buildMessages(PRODUCT, "<script>evil()</script>", null);
+  const m = buildMessages(PRODUCT, "<script>evil()</script>");
   assert.ok(!m.html.includes("<script>"));
   assert.ok(m.html.includes("&lt;script&gt;"));
 });
 
-test("buildMessages: HTML escapes checkout URL in html body", () => {
-  const checkoutUrl = "https://anginedepoitrine.com/checkout?a=1&b=2";
-  const m = buildMessages(PRODUCT, "reason", checkoutUrl);
-  assert.ok(m.html.includes("&amp;"));
-  assert.ok(!m.html.includes("a=1&b=2"));
-});
-
 test("buildMessages: tg message uses escTg not esc", () => {
-  const m = buildMessages(PRODUCT, "reason", null);
+  const m = buildMessages(PRODUCT, "reason");
   // Telegram message should have <b> and <a> tags (valid HTML), not escaped
   assert.ok(m.tg.includes("<b>RESTOCK:</b>"));
   assert.ok(m.tg.includes("<a href="));
 });
 
 test("buildMessages: tg escapes ampersand in URL", () => {
-  const product = { name: "Test", url: "https://anginedepoitrine.com/p?a=1&b=2" };
-  const m = buildMessages(product, "reason", null);
+  const product = { name: "Test", url: "https://anginedepoitrine.com/products/x?a=1&b=2" };
+  const m = buildMessages(product, "reason");
   assert.ok(!m.tg.includes("a=1&b=2"));
   assert.ok(m.tg.includes("a=1&amp;b=2"));
 });

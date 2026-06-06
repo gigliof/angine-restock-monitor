@@ -8,8 +8,7 @@ to its own license terms; check the upstream project for the full text.
 Runtime dependencies (full list in package.json)
 ────────────────────────────────────────────────────────────────────────────
 
-  axios                    - MIT       (HTTP client, pinned to 1.14.0)
-  cheerio                  - MIT       (server-side HTML parsing)
+  axios                    - MIT       (HTTP client, version-pinned)
   dotenv                   - BSD-2     (.env file loader)
   nodemailer               - MIT-0     (SMTP email)
 
@@ -17,7 +16,6 @@ Runtime dependencies (full list in package.json)
 Optional dependencies (installed only if the related feature is enabled)
 ────────────────────────────────────────────────────────────────────────────
 
-  puppeteer                - Apache-2.0 (headless Chromium for cart automation)
   whatsapp-web.js          - Apache-2.0 (WhatsApp notifications)
   qrcode-terminal          - Apache-2.0 (QR display for WhatsApp pairing)
 
@@ -25,7 +23,7 @@ Optional dependencies (installed only if the related feature is enabled)
 External services used at runtime (NOT bundled)
 ────────────────────────────────────────────────────────────────────────────
 
-  anginedepoitrine.com           - the monitored vinyl shop (scraped, read-only)
+  anginedepoitrine.com           - the monitored vinyl shop (read-only)
   Telegram Bot API               - only if NOTIFICATION_METHOD=telegram
   WhatsApp Web                   - only if NOTIFICATION_METHOD=whatsapp
   Your configured SMTP provider  - only if NOTIFICATION_METHOD=email
