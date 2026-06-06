@@ -75,16 +75,23 @@ const cartEnabled = optional("ENABLE_CART_AUTOMATION", "true") === "true";
 const ALLOWED_ORIGIN = "https://anginedepoitrine.com/";
 const ALLOWED_HOSTNAME = "anginedepoitrine.com";
 
+// Product page URLs on the Shopify store (2026 migration). Stock is read from
+// the Shopify product JSON endpoint (<url>.js), which exposes an authoritative
+// `available` flag - see lib/fetch.js fetchProductJson + lib/stock.js detectStock.
 const products = [
   {
     name: "Angine de Poitrine - Vol. 1 (Vinyle)",
-    url: "https://anginedepoitrine.com/product/1150712-angine-de-poitrine-vol-1-vinyle",
+    url: "https://anginedepoitrine.com/products/vinyle-vol-i",
   },
   {
     name: "Angine de Poitrine - Vol. II (Vinyle)",
-    url: "https://anginedepoitrine.com/product/1229664-angine-de-poitrine-vol-ii-vinyle",
+    url: "https://anginedepoitrine.com/products/vinyle-vol-ii",
   },
   {
+    // The bundle has no Shopify product page yet (the old URL 404s). Kept here
+    // intentionally so it's monitored the moment it returns; until then each
+    // check logs a fetch error and is skipped gracefully. Update the slug to
+    // the new /products/<slug> URL once the bundle is relisted.
     name: "Bundle Vol. I & II (Vinyle)",
     url: "https://anginedepoitrine.com/product/1230619-bundle-vol-i-et-ii-vinyle",
   },

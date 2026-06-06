@@ -60,7 +60,7 @@ const config = require("./config");
 const { log, sanitizeLog } = require("./lib/logger");
 const { loadStates, saveStates, STATE_FIELD_MAX } = require("./lib/state");
 const { detectStock } = require("./lib/stock");
-const { fetchPage } = require("./lib/fetch");
+const { fetchProductJson } = require("./lib/fetch");
 const { addToCartAndGetCheckoutUrl, loadPuppeteer, closeBrowser } = require("./lib/cart");
 const { notify, initWhatsApp, runDebugTelegram, runDebugWA } = require("./lib/notify");
 
@@ -73,15 +73,15 @@ const TEST_COOLDOWN_FILE = path.join(__dirname, ".last-test");
 
 async function checkProduct(product, states, dryRun = false) {
   log("Checking: " + product.name);
-  let html;
+  let productJson;
   try {
-    html = await fetchPage(product.url);
+    productJson = await fetchProductJson(product.url);
   } catch (err) {
     log("  Fetch error: " + sanitizeLog(err.message), { level: "error", product: product.name });
     return;
   }
 
-  const result = detectStock(html);
+  const result = detectStock(productJson);
   const key = product.url;
   const prevState = states[key];
   const now = new Date();
