@@ -36,7 +36,6 @@ body:
       options:
         - New notification channel (Discord, Pushover, Slack, ...)
         - Stock detection improvements
-        - Cart automation
         - Configuration / CLI ergonomics
         - Logging / observability
         - Packaging / deployment (Docker, systemd, ...)

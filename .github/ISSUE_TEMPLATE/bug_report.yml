@@ -7,7 +7,7 @@ body:
       value: |
         Thanks for taking the time to report a bug. The more detail you provide, the faster it gets fixed.
 
-        ⚠️ **Do not include any secrets** (SMTP passwords, Telegram tokens, WhatsApp session data, checkout URLs, personal addresses) in this report.
+        ⚠️ **Do not include any secrets** (SMTP passwords, Telegram tokens, WhatsApp session data) in this report.
 
   - type: dropdown
     id: area
@@ -18,7 +18,6 @@ body:
         - Email notifications
         - Telegram notifications
         - WhatsApp notifications
-        - Cart automation (Puppeteer)
         - Configuration / .env validation
         - Logging / state file
         - CLI flags
@@ -68,21 +67,9 @@ body:
     validations:
       required: true
 
-  - type: dropdown
-    id: cart
-    attributes:
-      label: Is cart automation enabled?
-      options:
-        - "Yes (ENABLE_CART_AUTOMATION=true, Puppeteer installed)"
-        - "No (ENABLE_CART_AUTOMATION=false)"
-        - "Yes, but Puppeteer not installed"
-        - "Not sure"
-    validations:
-      required: true
-
   - type: textarea
     id: logs
     attributes:
       label: Relevant log output
-      description: Paste from `monitor.log` if applicable. Redact any secrets, checkout URLs, or personal info.
+      description: Paste from `monitor.log` if applicable. Redact any secrets or personal info.
       render: shell
